@@ -31,7 +31,7 @@ export default async function handler(req,res){
    let data={};
    try{data=JSON.parse(text)}catch{}
    if(!response.ok||!data.ok) throw new Error(data.error||('Apps Script '+response.status));
-   const products=(data.products||[]).filter(p=>p&&p.name&&p.category&&p.available!==false);
+   const products=(data.products||[]).map(p=>({...p,category:String(p.sourceCategory||p.category||'').trim()})).filter(p=>p&&p.name&&p.category&&p.available!==false);
    return res.status(200).json({source:'administracion',products,config:{...fallbackConfig,...(data.config||{})}});
  }catch(error){
    return res.status(200).json({source:'demo',products:demoProducts,config:fallbackConfig,message:'No pudimos leer Nawi - Administración.',detail:String(error&&error.message||error)});
