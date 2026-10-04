@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#f4efe6" />
+  <meta name="description" content="Nawi Jabones Artesanales — catálogo y pedidos." />
+  <title>Nawi Jabones Artesanales</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Italiana&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles-base.css" />
+  <link rel="stylesheet" href="/styles-responsive.css" />
+</head>
+<body>
+  <div id="announcement" class="announcement hidden"></div>
+  <header class="site-header">
+    <div class="header-inner">
+      <button id="menuBtn" class="icon-btn menu-btn" aria-label="Abrir menú">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+      <a class="brand" href="#inicio" aria-label="Nawi - Inicio">
+        <span class="brand-main">NAWI</span>
+        <span class="brand-sub">JABONES ARTESANALES</span>
+      </a>
+      <nav class="desktop-nav" aria-label="Categorías">
+        <button data-category="Todos los productos" class="nav-link active">Todos los productos</button>
+        <button data-category="Jabones" class="nav-link">Jabones</button>
+        <button data-category="Cuidado del cabello" class="nav-link">Cuidado del cabello</button>
+        <button data-category="Para regalar" class="nav-link">Para regalar</button>
+      </nav>
+      <div class="header-actions">
+        <a id="instagramLink" class="icon-btn social desktop-only" target="_blank" rel="noopener" aria-label="Instagram">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" class="fill"/></svg>
+        </a>
+        <a id="whatsappLink" class="icon-btn social desktop-only" target="_blank" rel="noopener" aria-label="WhatsApp">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11.6a8 8 0 0 1-11.8 7l-4.2 1.1 1.1-4.1A8 8 0 1 1 20 11.6Z"/><path d="M9 8.2c.2-.4.4-.4.7-.4h.4c.2 0 .4.1.5.4l.8 1.8c.1.3 0 .5-.1.7l-.6.7c-.2.2-.1.4 0 .6.5.9 1.3 1.7 2.3 2.2.2.1.4.2.6 0l.8-1c.2-.2.4-.3.7-.2l1.7.8c.3.1.5.3.5.5 0 .4-.2 1.3-.9 1.8-.6.5-1.4.7-2.4.4-1.1-.3-2.5-.9-4.1-2.3-1.4-1.2-2.3-2.8-2.6-3.8-.3-1 .1-1.8.7-2.2Z"/></svg>
+        </a>
+        <button id="cartBtn" class="cart-btn" aria-label="Abrir carrito">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h2l2 11h10l2-7H7"/><circle cx="9" cy="19" r="1.4"/><circle cx="17" cy="19" r="1.4"/></svg>
+          <span id="cartCount" class="cart-count">0</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div id="mobileMenu" class="mobile-menu" aria-hidden="true">
+    <button data-category="Todos los productos">Todos los productos</button>
+    <button data-category="Jabones">Jabones</button>
+    <button data-category="Cuidado del cabello">Cuidado del cabello</button>
+    <button data-category="Para regalar">Para regalar</button>
+    <div class="mobile-socials"><a id="mobileInstagram" target="_blank">Instagram</a><a id="mobileWhatsapp" target="_blank">WhatsApp</a></div>
+  </div>
+
+  <main id="inicio">
+    <section class="hero">
+      <div class="hero-leaf leaf-one"></div><div class="hero-leaf leaf-two"></div>
+      <p class="eyebrow">HECHO A MANO · PEQUEÑOS LOTES</p>
+      <h1 id="heroTitle">Nawi</h1>
+      <p id="heroClaim" class="hero-claim">Volver a lo esencial. Cuidarte, disfrutar y elegir de manera más consciente.</p>
+      <a href="#catalogo" class="hero-cta">Descubrir productos <span>↓</span></a>
+    </section>
+
+    <section id="catalogo" class="catalog-section">
+      <div class="section-heading">
+        <div><p class="eyebrow">CATÁLOGO</p><h2 id="catalogTitle">Todos los productos</h2></div>
+        <p id="catalogMeta" class="catalog-meta"></p>
+      </div>
+      <div id="syncNotice" class="sync-notice hidden"></div>
+      <div class="category-pills" aria-label="Filtrar productos">
+        <button data-category="Todos los productos" class="pill active">Todos</button>
+        <button data-category="Jabones" class="pill">Jabones</button>
+        <button data-category="Cuidado del cabello" class="pill">Cabello</button>
+        <button data-category="Para regalar" class="pill">Para regalar</button>
+      </div>
+      <div id="productSections"></div>
+    </section>
+
+    <section class="brand-story">
+      <div class="story-mark">N</div>
+      <div><p class="eyebrow">NUESTRA ESENCIA</p><h2>Cuidado simple, consciente y especial.</h2><p>Productos artesanales pensados para transformar las rutinas cotidianas en pequeños momentos para disfrutar.</p></div>
+    </section>
+  </main>
+
+  <footer>
+    <a class="footer-brand" href="#inicio"><span>NAWI</span><small>JABONES ARTESANALES</small></a>
+    <div class="footer-links"><a id="footerInstagram" target="_blank">Instagram</a><a id="footerWhatsapp" target="_blank">WhatsApp</a><a id="footerEmail">Email</a></div>
+    <p id="footerDomain">nawijabonesartesanales.com.ar</p>
+  </footer>
+
+  <div id="backdrop" class="backdrop"></div>
+  <aside id="cartDrawer" class="drawer" aria-hidden="true">
+    <div class="drawer-header"><div><p class="eyebrow">CARRITO</p><h2>Tu pedido</h2></div><button id="closeCart" class="close-btn" aria-label="Cerrar">×</button></div>
+    <div id="cartItems" class="cart-items"></div>
+    <div id="cartFooter" class="cart-footer">
+      <div class="total-row"><span>Total</span><strong id="cartTotal">$0</strong></div>
+      <button id="checkoutBtn" class="primary-btn">Continuar con el pedido</button>
+      <button id="keepShopping" class="text-btn">Seguir comprando</button>
+    </div>
+  </aside>
+
+  <div id="imageModal" class="modal" aria-hidden="true">
+    <div class="image-modal-card"><button class="close-btn modal-close" data-close="imageModal">×</button><button id="prevPhoto" class="photo-nav prev">‹</button><img id="modalImage" alt="Imagen ampliada del producto"/><button id="nextPhoto" class="photo-nav next">›</button><div id="photoDots" class="photo-dots"></div></div>
+  </div>
+
+  <div id="checkoutModal" class="modal" aria-hidden="true">
+    <div class="checkout-card">
+      <button class="close-btn modal-close" data-close="checkoutModal">×</button>
+      <div id="checkoutStep">
+        <p class="eyebrow">FINALIZAR PEDIDO</p><h2>Datos de contacto</h2>
+        <form id="checkoutForm" novalidate>
+          <label>Nombre <span>*</span><input id="customerName" autocomplete="name" required /></label>
+          <label>Email <span>*</span><input id="customerEmail" type="email" autocomplete="email" required /></label>
+          <label>WhatsApp <span>*</span><input id="customerWhatsapp" type="tel" autocomplete="tel" placeholder="Ej. 11 1234 5678" required /></label>
+          <div class="checkout-summary"><div class="summary-head"><h3>Tu pedido</h3><button type="button" id="editCart" class="text-btn">Editar carrito</button></div><div id="checkoutItems"></div><div class="total-row"><span>Total</span><strong id="checkoutTotal"></strong></div></div>
+          <p id="checkoutMessage" class="checkout-message">No se realizará ningún pago en esta página. Nos comunicaremos por WhatsApp para coordinar el pago y la entrega.</p>
+          <div id="formError" class="form-error hidden"></div>
+          <button id="confirmBtn" class="primary-btn" type="submit">Confirmar pedido</button>
+        </form>
+      </div>
+      <div id="successStep" class="success-step hidden">
+        <div class="success-icon">✓</div><p class="eyebrow">PEDIDO RECIBIDO</p><h2>¡Gracias por tu pedido!</h2><p id="successOrderId" class="order-id"></p><div id="successItems" class="success-items"></div><div class="total-row"><span>Total</span><strong id="successTotal"></strong></div><p>Tu pedido quedó preparado correctamente. Continuá por WhatsApp para coordinar pago y entrega.</p><a id="continueWhatsapp" class="primary-btn whatsapp-btn" target="_blank" rel="noopener">Continuar por WhatsApp</a><button id="backToProducts" class="text-btn">Volver a productos</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+  <script src="/app-core.js"></script>
+  <script src="/app-flow.js"></script>
+</body>
+</html>
