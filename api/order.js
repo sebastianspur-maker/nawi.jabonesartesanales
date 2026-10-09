@@ -31,9 +31,26 @@ async function writeOrderToSheets(order){
   let data={};
   try{data=JSON.parse(text)}catch{}
 
-  if(!response.ok || !data.ok){
+  if(!response.ok){
     throw new Error(data.error||`Google Sheets respondió ${response.status}`);
   }
+
+  // Si Apps Script ya guardó el pedido pero falló una notificación secundaria
+  // (por ejemplo, permisos de MailApp), no bloqueamos al comprador.
+  if(!data.ok && data.saved){
+    return {
+      configured:true,
+      saved:true,
+      emailsSent:false,
+      warning:data.error||'Pedido guardado; notificación pendiente.',
+      id:data.id||order.id
+    };
+  }
+
+  if(!data.ok){
+    throw new Error(data.error||'Google Sheets no confirmó el pedido.');
+  }
+
   return {configured:true,...data};
 }
 
@@ -69,7 +86,16 @@ export default async function handler(req,res){
     return res.status(200).json({ok:true,id,total,persisted:true,storage:'vercel-blob',sheets:false});
   }
 
-  return res.status(200).json({ok:true,id,total,persisted:true,storage:'sheets+backup',sheets:true});
+  return res.status(200).json({
+    ok:true,
+    id,
+    total,
+    persisted:true,
+    storage:'sheets+backup',
+    sheets:true,
+    emailsSent:sheets.emailsSent!==false,
+    warning:sheets.warning||null
+  });
  }catch(error){
   console.error('order_error',error);
   return res.status(500).json({error:'No pudimos registrar el pedido. Intentá nuevamente.'});
