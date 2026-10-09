@@ -8,6 +8,15 @@
  * NAWI_SECRET = clave privada compartida con Vercel.
  */
 
+function authorizeMail_() {
+  var email = Session.getActiveUser().getEmail() || 'nawijabonesartesanales@gmail.com';
+  MailApp.sendEmail(
+    email,
+    'Nawi · correo autorizado',
+    'La autorización de correo de Nawi quedó activada correctamente.'
+  );
+}
+
 function doGet(e) {
   try {
     var action = String((e && e.parameter && e.parameter.action) || 'catalog');
