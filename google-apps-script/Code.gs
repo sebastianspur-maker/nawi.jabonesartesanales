@@ -67,56 +67,64 @@ function doPost(e) {
       throw new Error('Faltan las pestañas Pedidos o DetallePedidos.');
     }
 
-    // Idempotencia: no insertar ni notificar dos veces el mismo PedidoID.
-    var lastRow = pedidos.getLastRow();
-    if (lastRow >= 2) {
-      var ids = pedidos.getRange(2, 1, lastRow - 1, 1).getValues().flat();
-      if (ids.indexOf(order.id) !== -1) {
-        return json_({ ok: true, duplicate: true, id: order.id });
-      }
-    }
+    var orderRow = findOrderRow_(pedidos, order.id);
+    var duplicate = orderRow > 0;
 
-    var createdAt = order.createdAt ? new Date(order.createdAt) : new Date();
+    if (!duplicate) {
+      var createdAt = order.createdAt ? new Date(order.createdAt) : new Date();
 
-    pedidos.appendRow([
-      order.id,
-      createdAt,
-      order.name,
-      order.email,
-      order.whatsapp,
-      Number(order.total) || 0,
-      'Nuevo',
-      'No',
-      ''
-    ]);
-
-    var detailRows = (order.items || []).map(function(item) {
-      return [
+      pedidos.appendRow([
         order.id,
-        String(item.id || ''),
-        String(item.category || ''),
-        String(item.name || ''),
-        Number(item.quantity) || 0,
-        Number(item.unitPrice) || 0,
-        Number(item.subtotal) || 0
-      ];
-    });
+        createdAt,
+        order.name,
+        order.email,
+        order.whatsapp,
+        Number(order.total) || 0,
+        'Nuevo',
+        'No',
+        ''
+      ]);
 
-    if (detailRows.length) {
-      detalle
-        .getRange(detalle.getLastRow() + 1, 1, detailRows.length, detailRows[0].length)
-        .setValues(detailRows);
+      orderRow = pedidos.getLastRow();
+
+      var detailRows = (order.items || []).map(function(item) {
+        return [
+          order.id,
+          String(item.id || ''),
+          String(item.category || ''),
+          String(item.name || ''),
+          Number(item.quantity) || 0,
+          Number(item.unitPrice) || 0,
+          Number(item.subtotal) || 0
+        ];
+      });
+
+      if (detailRows.length) {
+        detalle
+          .getRange(detalle.getLastRow() + 1, 1, detailRows.length, detailRows[0].length)
+          .setValues(detailRows);
+      }
+
+      SpreadsheetApp.flush();
     }
 
-    SpreadsheetApp.flush();
+    var mailStatus = sendPendingOrderEmails_(order, ss, pedidos, orderRow);
 
-    // Los emails forman parte de la confirmación del pedido.
-    sendOrderEmails_(order, ss);
+    if (!mailStatus.complete) {
+      return json_({
+        ok: false,
+        saved: true,
+        id: order.id,
+        duplicate: duplicate,
+        emailsSent: false,
+        error: 'El pedido quedó guardado, pero no pudimos enviar todos los emails. Reintentá la confirmación.'
+      });
+    }
 
     return json_({
       ok: true,
       id: order.id,
-      detailRows: detailRows.length,
+      duplicate: duplicate,
       emailsSent: true
     });
 
@@ -130,30 +138,82 @@ function doPost(e) {
   }
 }
 
-function sendOrderEmails_(order, ss) {
+function findOrderRow_(pedidos, orderId) {
+  var lastRow = pedidos.getLastRow();
+  if (lastRow < 2) return 0;
+
+  var ids = pedidos.getRange(2, 1, lastRow - 1, 1).getValues();
+  for (var i = 0; i < ids.length; i++) {
+    if (String(ids[i][0]) === String(orderId)) return i + 2;
+  }
+
+  return 0;
+}
+
+function sendPendingOrderEmails_(order, ss, pedidos, rowNumber) {
+  var noteCell = pedidos.getRange(rowNumber, 9);
+  var note = String(noteCell.getValue() || '');
+  var businessDone = note.indexOf('EMAIL_ADMIN_OK') !== -1;
+  var customerDone = note.indexOf('EMAIL_CUSTOMER_OK') !== -1;
+
   var config = readConfig_(ss);
   var businessEmail = String(config.email || 'nawijabonesartesanales@gmail.com').trim();
   var customerEmail = String(order.email || '').trim();
   var plain = orderEmailPlain_(order);
   var html = orderEmailHtml_(order);
 
-  MailApp.sendEmail({
-    to: businessEmail,
-    subject: 'Nuevo pedido Nawi · ' + order.id,
-    body: plain,
-    htmlBody: html,
-    name: 'Nawi Jabones Artesanales',
-    replyTo: customerEmail
-  });
+  try {
+    if (!businessDone) {
+      MailApp.sendEmail({
+        to: businessEmail,
+        subject: 'Nuevo pedido Nawi · ' + order.id,
+        body: plain,
+        htmlBody: html,
+        name: 'Nawi Jabones Artesanales',
+        replyTo: customerEmail
+      });
 
-  MailApp.sendEmail({
-    to: customerEmail,
-    subject: 'Confirmación de tu pedido Nawi · ' + order.id,
-    body: plain,
-    htmlBody: html,
-    name: 'Nawi Jabones Artesanales',
-    replyTo: businessEmail
-  });
+      note = appendNote_(note, 'EMAIL_ADMIN_OK');
+      noteCell.setValue(note);
+      businessDone = true;
+    }
+
+    if (!customerDone) {
+      MailApp.sendEmail({
+        to: customerEmail,
+        subject: 'Confirmación de tu pedido Nawi · ' + order.id,
+        body: plain,
+        htmlBody: html,
+        name: 'Nawi Jabones Artesanales',
+        replyTo: businessEmail
+      });
+
+      note = appendNote_(note, 'EMAIL_CUSTOMER_OK');
+      noteCell.setValue(note);
+      customerDone = true;
+    }
+
+    return {
+      businessSent: businessDone,
+      customerSent: customerDone,
+      complete: businessDone && customerDone
+    };
+
+  } catch (err) {
+    note = appendNote_(note, 'EMAIL_ERROR: ' + errorMessage_(err));
+    noteCell.setValue(note);
+
+    return {
+      businessSent: businessDone,
+      customerSent: customerDone,
+      complete: false
+    };
+  }
+}
+
+function appendNote_(note, value) {
+  var current = String(note || '').trim();
+  return current ? current + ' | ' + value : value;
 }
 
 function readConfig_(ss) {
