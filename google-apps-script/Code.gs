@@ -8,7 +8,7 @@
  * NAWI_SECRET = clave privada compartida con Vercel.
  */
 
-function authorizeMail_() {
+function authorizeMail() {
   var email = Session.getActiveUser().getEmail() || 'nawijabonesartesanales@gmail.com';
   MailApp.sendEmail(
     email,
